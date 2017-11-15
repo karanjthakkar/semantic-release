@@ -68,13 +68,13 @@ module.exports = async ({version, gitHead}, branch) => {
   }
 
   Object.assign(gitLogParser.fields, {hash: 'H', message: 'B', gitTags: 'd', committerDate: {key: 'ci', type: Date}});
-  const commits = (await getStream.array(gitLogParser.parse({_: `${gitHead ? gitHead + '..' : ''}HEAD`}))).map(
-    commit => {
-      commit.message = commit.message.trim();
-      commit.gitTags = commit.gitTags.trim();
-      return commit;
-    }
-  );
+  const commits = (await getStream.array(
+    gitLogParser.parse({_: `${gitHead ? gitHead + '..' : ''}HEAD`, 'no-merges': true})
+  )).map(commit => {
+    commit.message = commit.message.trim();
+    commit.gitTags = commit.gitTags.trim();
+    return commit;
+  });
   logger.log('Found %s commits since last release', commits.length);
   debug('Parsed commits: %o', commits);
   return {commits, lastRelease: {version, gitHead}};
